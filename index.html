@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pincelada — Creador de contenido</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stone-50: #fafaf9;
+    --stone-100: #f5f5f4;
+    --stone-200: #e7e5e4;
+    --stone-400: #a8a29e;
+    --stone-500: #78716c;
+    --stone-600: #57534e;
+    --stone-900: #292524;
+    --gold: #b8905a;
+    --gold-light: #d4b88a;
+    --gold-dark: #8a6a3e;
+    --brand-100: #f3ede2;
+    --brand-dark: #5e4332;
+    --ui-bg: #111;
+    --ui-surface: #1a1a1a;
+    --ui-border: #2a2a2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ui-bg);
+    font-family: 'DM Sans', sans-serif;
+    color: #ccc;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ====== TOP BAR ====== */
+  .topbar {
+    background: var(--ui-surface);
+    border-bottom: 1px solid var(--ui-border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+  }
+
+  .topbar .subtitle {
+    font-size: 10px;
+    color: var(--stone-500);
+    margin-left: 10px;
+  }
+
+  .btn-download {
+    background: var(--gold);
+    color: var(--stone-900);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 2px;
+  }
+
+  .btn-download:hover { background: var(--gold-light); }
+  .btn-download:active { transform: scale(0.97); }
+  .btn-download.downloading { opacity: 0.6; pointer-events: none; }
+
+  /* ====== DESKTOP LAYOUT ====== */
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 52px);
+  }
+
+  /* ====== SIDEBAR ====== */
+  .sidebar {
+    width: 320px;
+    background: var(--ui-surface);
+    border-right: 1px solid var(--ui-border);
+    padding: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--stone-500);
+    margin-bottom: 10px;
+  }
+
+  .template-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .template-btn {
+    background: var(--ui-bg);
+    border: 2px solid var(--ui-border);
+    color: #aaa;
+    padding: 10px 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .template-btn:hover { border-color: var(--stone-500); color: #fff; }
+  .template-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(184,144,90,0.06); }
+
+  .variant-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .variant-btn {
+    flex: 1;
+    min-width: 60px;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    color: #888;
+    padding: 7px 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .variant-btn:hover { border-color: var(--stone-500); }
+  .variant-btn.active { border-color: var(--gold); color: var(--gold); }
+
+  .field-group { margin-bottom: 16px; }
+
+  .field-group label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--stone-500);
+    margin-bottom: 5px;
+  }
+
+  .field-group input,
+  .field-group textarea {
+    width: 100%;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    color: #ddd;
+    padding: 9px 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: 2px;
+    -webkit-appearance: none;
+  }
+
+  .field-group input:focus,
+  .field-group textarea:focus { border-color: var(--gold); }
+
+  .field-group textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+
+  .image-upload {
+    width: 100%;
+    height: 70px;
+    background: var(--ui-bg);
+    border: 2px dashed var(--ui-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+
+  .image-upload:hover { border-color: var(--stone-500); }
+  .image-upload span { font-size: 12px; color: var(--stone-500); }
+  .image-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 16px; }
+  .image-upload.has-image { border-style: solid; border-color: var(--gold); }
+  .image-upload.has-image span { color: var(--gold); }
+
+  /* ====== CANVAS AREA ====== */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+  }
+
+  .canvas-wrapper { position: relative; }
+
+  .canvas-size-label {
+    position: absolute;
+    top: -22px;
+    left: 0;
+    font-size: 10px;
+    color: var(--stone-600);
+    letter-spacing: 0.05em;
+  }
+
+  /* ====== RENDER FRAME — always rendered at native px, scaled visually ====== */
+  .render-frame {
+    width: 540px;
+    height: 675px;
+    transform-origin: top left;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .render-frame.story-size {
+    width: 405px;
+    height: 720px;
+  }
+
+  /* ====== MOBILE ====== */
+  @media (max-width: 860px) {
+    .topbar .subtitle { display: none; }
+    .topbar h1 { font-size: 16px; }
+    .btn-download { padding: 9px 16px; font-size: 12px; }
+
+    .layout {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-top: 1px solid var(--ui-border);
+      padding: 16px;
+      order: 2;
+    }
+
+    .canvas-area {
+      order: 1;
+      padding: 0;
+      flex: none;
+      display: block;
+    }
+
+    .canvas-wrapper {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .render-frame {
+      box-shadow: none;
+    }
+
+    .canvas-size-label { display: none; }
+
+    .template-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .template-btn { padding: 8px 4px; font-size: 9px; }
+
+    .section-divider {
+      height: 1px;
+      background: var(--ui-border);
+      margin: 16px 0;
+    }
+  }
+
+  /* ====== ACTUAL TEMPLATE STYLES ====== */
+  .tpl {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .linen {
+    background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .linen-dark {
+    background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  .brand-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .gold-line {
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .handle-bottom {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--gold);
+    opacity: 0.5;
+    position: absolute;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* -- Quote -- */
+  .tpl-quote { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 48px; }
+  .tpl-quote.light { background: var(--brand-100); }
+  .tpl-quote.dark { background: var(--stone-900); }
+  .tpl-quote .gold-wash { position: absolute; top: 0; left: 0; width: 100%; height: 35%; pointer-events: none; }
+  .tpl-quote.light .gold-wash { background: radial-gradient(ellipse at 30% 0%, rgba(184,144,90,0.12) 0%, transparent 70%); }
+  .tpl-quote.dark .gold-wash { background: radial-gradient(ellipse at 70% 100%, rgba(184,144,90,0.08) 0%, transparent 60%); }
+  .tpl-quote .brand-tag { position: absolute; top: 52px; }
+  .tpl-quote .quote-text { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 400; line-height: 1.35; max-width: 440px; }
+  .tpl-quote.light .quote-text { color: var(--stone-900); }
+  .tpl-quote.dark .quote-text { color: var(--brand-100); }
+  .tpl-quote .quote-bold { font-weight: 700; }
+
+  /* -- Photo overlay -- */
+  .tpl-photo { display: flex; flex-direction: column; }
+  .tpl-photo .photo-section { flex: 1; background-size: cover; background-position: center; position: relative; }
+  .tpl-photo .photo-gradient { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 100%); }
+  .tpl-photo .photo-overlay-text { position: absolute; bottom: 30px; left: 30px; right: 30px; font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 400; color: #fff; line-height: 1.3; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+  .tpl-photo .info-bar { height: 170px; background: var(--brand-100); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; }
+  .tpl-photo .info-bar .loc-main { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--stone-900); }
+  .tpl-photo .info-bar .loc-sub { font-size: 14px; color: var(--stone-600); }
+  .tpl-photo .info-bar .brand-tag { font-size: 11px; margin-top: 6px; }
+  .tpl-photo-top .top-bar { height: 160px; background: var(--brand-100); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+  .tpl-photo-top .top-bar .title-text { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; color: var(--stone-900); text-align: center; padding: 0 20px; }
+  .tpl-photo-top .photo-full { flex: 1; background-size: cover; background-position: center; }
+
+  /* -- Artist -- */
+  .tpl-artist { display: flex; flex-direction: column; }
+  .tpl-artist.dark { background: var(--stone-900); }
+  .tpl-artist.light { background: var(--brand-100); }
+  .tpl-artist .artist-photo { height: 400px; background-size: cover; background-position: center; position: relative; }
+  .tpl-artist.dark .artist-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--stone-900) 100%); }
+  .tpl-artist.light .artist-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, var(--brand-100) 100%); }
+  .tpl-artist .artist-info { flex: 1; padding: 0 40px 40px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+  .tpl-artist .artist-info .tag { font-size: 12px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .tpl-artist .artist-info .name { font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 400; line-height: 1.15; }
+  .tpl-artist.dark .artist-info .name { color: var(--brand-100); }
+  .tpl-artist.light .artist-info .name { color: var(--stone-900); }
+  .tpl-artist .artist-info .technique { font-size: 17px; margin-top: 2px; }
+  .tpl-artist.dark .artist-info .technique { color: var(--stone-400); }
+  .tpl-artist.light .artist-info .technique { color: var(--stone-600); }
+  .tpl-artist .artist-info .quote { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; line-height: 1.5; margin-top: 16px; padding-left: 16px; border-left: 3px solid var(--gold); }
+  .tpl-artist.dark .artist-info .quote { color: var(--stone-400); }
+  .tpl-artist.light .artist-info .quote { color: var(--stone-600); }
+
+  /* -- Announce -- */
+  .tpl-announce { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 40px; }
+  .tpl-announce.light { background: var(--brand-100); }
+  .tpl-announce.dark { background: var(--stone-900); }
+  .tpl-announce .gold-stripe { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, var(--gold), var(--gold-light), transparent); }
+  .tpl-announce .brand-tag { position: absolute; top: 44px; }
+  .tpl-announce .badge { font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); background: rgba(184,144,90,0.12); padding: 8px 22px; margin-bottom: 28px; }
+  .tpl-announce .title { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 400; line-height: 1.3; max-width: 420px; }
+  .tpl-announce.light .title { color: var(--stone-900); }
+  .tpl-announce.dark .title { color: var(--brand-100); }
+  .tpl-announce .body { font-size: 17px; line-height: 1.7; margin-top: 22px; max-width: 380px; }
+  .tpl-announce.light .body { color: var(--stone-600); }
+  .tpl-announce.dark .body { color: var(--stone-400); }
+  .tpl-announce .cta-btn { margin-top: 32px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 36px; border: none; cursor: default; }
+  .tpl-announce.light .cta-btn { background: var(--stone-900); color: var(--brand-100); }
+  .tpl-announce.dark .cta-btn { background: var(--gold); color: var(--stone-900); }
+
+  /* -- Blog -- */
+  .tpl-blog { display: flex; flex-direction: column; }
+  .tpl-blog.dark { background: var(--stone-900); }
+  .tpl-blog.light { background: var(--brand-100); }
+  .tpl-blog .blog-content { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; gap: 16px; }
+  .tpl-blog .blog-content .tag { font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }
+  .tpl-blog .blog-content .type-badge { font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-dark); background: rgba(184,144,90,0.1); padding: 6px 16px; align-self: flex-start; }
+  .tpl-blog .blog-content .blog-title { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 400; line-height: 1.3; }
+  .tpl-blog.dark .blog-content .blog-title { color: var(--brand-100); }
+  .tpl-blog.light .blog-content .blog-title { color: var(--stone-900); }
+  .tpl-blog .blog-content .excerpt { font-size: 16px; line-height: 1.7; }
+  .tpl-blog.dark .blog-content .excerpt { color: var(--stone-400); }
+  .tpl-blog.light .blog-content .excerpt { color: var(--stone-600); }
+  .tpl-blog .blog-content .url { font-size: 13px; color: var(--stone-500); margin-top: 4px; }
+  .tpl-blog .blog-bar { padding: 28px 40px; display: flex; align-items: center; justify-content: space-between; }
+  .tpl-blog.dark .blog-bar { background: rgba(184,144,90,0.06); border-top: 1px solid rgba(184,144,90,0.15); }
+  .tpl-blog.light .blog-bar { background: rgba(41,37,36,0.04); border-top: 1px solid var(--stone-200); }
+  .tpl-blog .blog-bar .cta-text { font-size: 15px; font-weight: 500; letter-spacing: 0.05em; }
+  .tpl-blog.dark .blog-bar .cta-text { color: var(--gold-light); }
+  .tpl-blog.light .blog-bar .cta-text { color: var(--stone-900); }
+  .tpl-blog .blog-bar .arrow { font-size: 24px; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:baseline;">
+    <h1>Pincelada</h1>
+    <span class="subtitle">Creador de contenido</span>
+  </div>
+  <button class="btn-download" id="downloadBtn" onclick="downloadPNG()">
+    <span id="dlText">Descargar PNG</span>
+  </button>
+</div>
+
+<div class="layout">
+
+  <!-- CANVAS — comes first in DOM, shows on top on mobile -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <div class="canvas-size-label" id="sizeLabel">1080 × 1350 px (4:5)</div>
+      <div class="render-frame" id="renderFrame"></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR — below on mobile, left on desktop -->
+  <div class="sidebar" id="sidebar">
+
+    <h2>Template</h2>
+    <div class="template-grid" id="templateGrid">
+      <button class="template-btn active" data-tpl="quote">Quote / Frase</button>
+      <button class="template-btn" data-tpl="photo">Foto + Overlay</button>
+      <button class="template-btn" data-tpl="artist">Artista</button>
+      <button class="template-btn" data-tpl="announce">Anuncio</button>
+      <button class="template-btn" data-tpl="blog">Blog / Guía</button>
+      <button class="template-btn" data-tpl="dato">Dato / Número</button>
+      <button class="template-btn" data-tpl="portada">Portada Carrusel</button>
+      <button class="template-btn" data-tpl="cierre">Cierre Carrusel</button>
+      <button class="template-btn" data-tpl="beforeafter">Antes / Después</button>
+      <button class="template-btn" data-tpl="testimonial">Testimonial</button>
+      <button class="template-btn" data-tpl="story">Historia (9:16)</button>
+      <button class="template-btn" data-tpl="pregunta">Pregunta (9:16)</button>
+    </div>
+
+    <h2>Variante</h2>
+    <div class="variant-row" id="variantRow"></div>
+
+    <div id="fieldsContainer"></div>
+
+  </div>
+</div>
+
+<script>
+const TEMPLATES = {
+  quote: {
+    name: 'Quote / Frase',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'line1', label: 'Línea 1', type: 'text', default: 'Montevideo tiene un museo' },
+      { id: 'line2', label: 'Línea 2 (negrita)', type: 'text', default: 'que nadie cobra entrada' },
+    ],
+    render: (f, v) => `
+      <div class="tpl tpl-quote ${v} ${v === 'light' ? 'linen' : 'linen-dark'}">
+        <div class="gold-wash"></div>
+        <span class="brand-tag">P I N C E L A D A &nbsp; U Y</span>
+        <div class="gold-line" style="width:180px;margin-bottom:36px;"></div>
+        <div class="quote-text">${esc(f.line1)}<br><span class="quote-bold">${esc(f.line2)}</span></div>
+        <div class="gold-line" style="width:180px;margin-top:36px;"></div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`
+  },
+
+  photo: {
+    name: 'Foto + Overlay',
+    variants: ['bottom', 'top'],
+    ratio: 'post',
+    fields: [
+      { id: 'image', label: 'Foto', type: 'image' },
+      { id: 'overlay', label: 'Texto sobre foto', type: 'text', default: 'Barrio Sur también se mira así' },
+      { id: 'location', label: 'Ubicación', type: 'text', default: 'Barrio Sur, Montevideo' },
+      { id: 'detail', label: 'Detalle', type: 'text', default: 'Mural sobre Isla de Flores' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(135deg, #333, #555)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      if (v === 'top') {
+        return `
+        <div class="tpl tpl-photo tpl-photo-top" style="display:flex;flex-direction:column;">
+          <div class="top-bar linen">
+            <span class="brand-tag" style="font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+            <div class="title-text">${esc(f.overlay)}</div>
+            <div class="gold-line" style="width:120px;"></div>
+          </div>
+          <div class="photo-full" style="background:${bgStyle};"></div>
+        </div>`;
+      }
+      return `
+      <div class="tpl tpl-photo" style="display:flex;flex-direction:column;">
+        <div class="photo-section" style="background:${bgStyle};">
+          <div class="photo-gradient"></div>
+          <div class="photo-overlay-text">${esc(f.overlay)}</div>
+        </div>
+        <div class="info-bar linen">
+          <span class="loc-main">${esc(f.location)}</span>
+          <span class="loc-sub">${esc(f.detail)}</span>
+          <span class="brand-tag" style="font-size:11px;margin-top:6px;">P I N C E L A D A &nbsp; U Y</span>
+        </div>
+      </div>`;
+    }
+  },
+
+  artist: {
+    name: 'Artista Spotlight',
+    variants: ['dark', 'light'],
+    ratio: 'post',
+    fields: [
+      { id: 'image', label: 'Foto de obra', type: 'image' },
+      { id: 'name', label: 'Nombre', type: 'text', default: 'Valentina\nRodríguez' },
+      { id: 'technique', label: 'Técnica y lugar', type: 'text', default: 'Acrílico sobre tela · Montevideo' },
+      { id: 'quote', label: 'Frase del artista', type: 'textarea', default: 'Pinto lo que no puedo decir con palabras.' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(135deg, #333, #555)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      return `
+      <div class="tpl tpl-artist ${v} ${v === 'dark' ? 'linen-dark' : 'linen'}">
+        <div class="artist-photo" style="background:${bgStyle};"></div>
+        <div class="artist-info">
+          <div class="tag">A R T I S T A &nbsp; P I N C E L A D A</div>
+          <div class="name">${esc(f.name).replace(/\n/g, '<br>')}</div>
+          <div class="technique">${esc(f.technique)}</div>
+          <div class="quote">"${esc(f.quote)}"</div>
+        </div>
+        <span class="handle-bottom" style="right:40px;left:auto;transform:none;">@pincelada.uy</span>
+      </div>`;
+    }
+  },
+
+  announce: {
+    name: 'Anuncio',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'badge', label: 'Badge (tipo)', type: 'text', default: 'Convocatoria abierta' },
+      { id: 'title', label: 'Título', type: 'text', default: 'Buscamos artistas\nque pinten en serio' },
+      { id: 'body', label: 'Cuerpo', type: 'textarea', default: 'Si creás obra original y querés vender en una plataforma pensada para vos, escribinos.' },
+      { id: 'cta', label: 'Botón CTA', type: 'text', default: 'Escribinos por DM' },
+    ],
+    render: (f, v) => `
+      <div class="tpl tpl-announce ${v} ${v === 'light' ? 'linen' : 'linen-dark'}">
+        <div class="gold-stripe"></div>
+        <span class="brand-tag">P I N C E L A D A &nbsp; U Y</span>
+        <div class="badge">${esc(f.badge)}</div>
+        <div class="title">${esc(f.title).replace(/\n/g, '<br>')}</div>
+        <div class="body">${esc(f.body)}</div>
+        <div class="cta-btn">${esc(f.cta)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`
+  },
+
+  blog: {
+    name: 'Blog / Guía',
+    variants: ['dark', 'light'],
+    ratio: 'post',
+    fields: [
+      { id: 'type', label: 'Tipo (badge)', type: 'text', default: 'Guía' },
+      { id: 'title', label: 'Título', type: 'text', default: 'Cómo encargar arte\npor primera vez' },
+      { id: 'excerpt', label: 'Descripción', type: 'textarea', default: 'No necesitás saber de arte. Solo necesitás saber qué te gusta.' },
+      { id: 'cta', label: 'Texto CTA', type: 'text', default: 'Leé la guía completa' },
+      { id: 'linktext', label: 'Texto del link', type: 'text', default: 'Link en bio' },
+    ],
+    render: (f, v) => `
+      <div class="tpl tpl-blog ${v} ${v === 'dark' ? 'linen-dark' : 'linen'}">
+        <div class="blog-content">
+          <span class="tag">P I N C E L A D A &nbsp; U Y</span>
+          <span class="type-badge">${esc(f.type)}</span>
+          <div class="blog-title">${esc(f.title).replace(/\n/g, '<br>')}</div>
+          <div class="excerpt">${esc(f.excerpt)}</div>
+          <div class="url">${esc(f.linktext)}</div>
+        </div>
+        <div class="blog-bar">
+          <span class="cta-text">${esc(f.cta)}</span>
+          <span class="arrow">→</span>
+        </div>
+      </div>`
+  },
+
+  dato: {
+    name: 'Dato',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'number', label: 'Número grande', type: 'text', default: '40' },
+      { id: 'unit', label: 'Unidad', type: 'text', default: 'horas de trabajo' },
+      { id: 'text', label: 'Contexto', type: 'text', default: 'Es lo que lleva un acrílico de 50x70 en promedio.' },
+      { id: 'source', label: 'Fuente', type: 'text', default: 'Fuente: artistas de Pincelada' },
+    ],
+    render: (f, v) => `
+      <div class="tpl ${v === 'dark' ? 'linen-dark' : 'linen'}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px;background:${v === 'dark' ? 'var(--stone-900)' : 'var(--brand-100)'};">
+        <span class="brand-tag" style="position:absolute;top:52px;">P I N C E L A D A &nbsp; U Y</span>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:96px;font-weight:300;color:var(--gold);line-height:1;margin-bottom:8px;">${esc(f.number)}</div>
+        <div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:${v === 'dark' ? 'var(--stone-400)' : 'var(--stone-500)'};margin-bottom:28px;">${esc(f.unit)}</div>
+        <div class="gold-line" style="width:120px;margin-bottom:28px;"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:30px;color:${v === 'dark' ? 'var(--brand-100)' : 'var(--stone-900)'};line-height:1.4;max-width:400px;">${esc(f.text)}</div>
+        <div style="font-size:13px;color:var(--stone-400);margin-top:20px;">${esc(f.source)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`
+  },
+
+  portada: {
+    name: 'Portada Carrusel',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'line1', label: 'Línea 1', type: 'text', default: 'Montevideo tiene un museo' },
+      { id: 'line2', label: 'Línea 2 (negrita)', type: 'text', default: 'que nadie cobra entrada' },
+      { id: 'swipe', label: 'Texto deslizar', type: 'text', default: 'Deslizá para ver' },
+    ],
+    render: (f, v) => `
+      <div class="tpl ${v === 'light' ? 'linen' : 'linen-dark'}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 44px;background:${v === 'dark' ? 'var(--stone-900)' : 'var(--brand-100)'};">
+        <div style="position:absolute;top:0;left:0;width:100%;height:40%;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,rgba(184,144,90,${v === 'dark' ? '0.1' : '0.15'}) 0%,transparent 65%);"></div>
+        <span class="brand-tag" style="position:absolute;top:52px;">P I N C E L A D A &nbsp; U Y</span>
+        <div class="gold-line" style="width:180px;margin-bottom:36px;"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;line-height:1.35;max-width:440px;color:${v === 'dark' ? 'var(--brand-100)' : 'var(--stone-900)'};">${esc(f.line1)}<br><span style="font-weight:700;">${esc(f.line2)}</span></div>
+        <div class="gold-line" style="width:180px;margin-top:36px;"></div>
+        <div style="position:absolute;bottom:52px;font-size:13px;color:var(--stone-400);display:flex;align-items:center;gap:8px;">
+          ${esc(f.swipe)} <span style="display:inline-block;width:28px;height:1px;background:var(--gold);opacity:0.6;"></span> →
+        </div>
+      </div>`
+  },
+
+  cierre: {
+    name: 'Cierre Carrusel',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'line1', label: 'Línea 1', type: 'text', default: 'Esto también es' },
+      { id: 'line2', label: 'Línea 2 (negrita)', type: 'text', default: 'Pincelada' },
+      { id: 'sub', label: 'Subtexto', type: 'text', default: 'Mirar primero. Encontrar artistas después.' },
+      { id: 'cta', label: 'Botón CTA', type: 'text', default: 'Seguinos para más' },
+    ],
+    render: (f, v) => `
+      <div class="tpl ${v === 'light' ? 'linen' : 'linen-dark'}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px;background:${v === 'dark' ? 'var(--stone-900)' : 'var(--brand-100)'};">
+        <div style="position:absolute;bottom:0;left:0;width:100%;height:35%;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(184,144,90,${v === 'dark' ? '0.08' : '0.12'}) 0%,transparent 65%);"></div>
+        <span class="brand-tag" style="position:absolute;top:52px;">P I N C E L A D A &nbsp; U Y</span>
+        <div class="gold-line" style="width:140px;margin-bottom:32px;"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;line-height:1.35;max-width:420px;color:${v === 'dark' ? 'var(--brand-100)' : 'var(--stone-900)'};">${esc(f.line1)}<br><span style="font-weight:700;">${esc(f.line2)}</span></div>
+        <div style="font-size:16px;line-height:1.6;margin-top:18px;max-width:360px;color:${v === 'dark' ? 'var(--stone-400)' : 'var(--stone-600)'};">${esc(f.sub)}</div>
+        <div style="margin-top:30px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:14px 32px;background:${v === 'dark' ? 'var(--gold)' : 'var(--stone-900)'};color:${v === 'dark' ? 'var(--stone-900)' : 'var(--brand-100)'};">${esc(f.cta)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`
+  },
+
+  beforeafter: {
+    name: 'Antes / Después',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'image', label: 'Foto "Antes" (izq)', type: 'image' },
+      { id: 'image2', label: 'Foto "Después" (der)', type: 'image2' },
+      { id: 'title', label: 'Título', type: 'text', default: 'Una pared puede cambiar todo' },
+      { id: 'detail', label: 'Detalle', type: 'text', default: 'Acrílico 80×60 · Comisión vía Pincelada' },
+    ],
+    render: (f, v) => {
+      const bgL = f._imageData || 'linear-gradient(135deg, #444, #333)';
+      const bgR = f._imageData2 || 'linear-gradient(135deg, #555, #444)';
+      const bgLStyle = f._imageData ? `url('${bgL}') center/cover` : bgL;
+      const bgRStyle = f._imageData2 ? `url('${bgR}') center/cover` : bgR;
+      const isDark = v === 'dark';
+      return `
+      <div class="tpl" style="display:flex;flex-direction:column;">
+        <div style="flex:1;display:flex;position:relative;">
+          <div style="flex:1;background:${bgLStyle};background-size:cover;background-position:center;position:relative;">
+            <div style="position:absolute;bottom:12px;left:12px;font-size:12px;letter-spacing:0.25em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,0.6);padding:6px 14px;z-index:3;">Antes</div>
+          </div>
+          <div style="position:absolute;top:0;bottom:0;left:50%;width:4px;background:var(--gold);transform:translateX(-50%);z-index:2;"></div>
+          <div style="flex:1;background:${bgRStyle};background-size:cover;background-position:center;position:relative;">
+            <div style="position:absolute;bottom:12px;right:12px;font-size:12px;letter-spacing:0.25em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,0.6);padding:6px 14px;z-index:3;">Después</div>
+          </div>
+        </div>
+        <div style="height:200px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:20px;text-align:center;background:${isDark ? 'var(--stone-900)' : 'var(--brand-100)'};">
+          <span class="brand-tag" style="font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;color:${isDark ? 'var(--brand-100)' : 'var(--stone-900)'};line-height:1.3;max-width:400px;">${esc(f.title)}</div>
+          <div style="font-size:14px;color:${isDark ? 'var(--stone-400)' : 'var(--stone-600)'};">${esc(f.detail)}</div>
+        </div>
+      </div>`;
+    }
+  },
+
+  testimonial: {
+    name: 'Testimonial',
+    variants: ['light', 'dark'],
+    ratio: 'post',
+    fields: [
+      { id: 'quote', label: 'Cita / testimonio', type: 'textarea', default: 'No sabía que se podía encargar un cuadro así. Fue más fácil de lo que pensaba.' },
+      { id: 'name', label: 'Nombre', type: 'text', default: 'María L.' },
+      { id: 'role', label: 'Rol / contexto', type: 'text', default: 'Primera compra en Pincelada' },
+    ],
+    render: (f, v) => `
+      <div class="tpl ${v === 'light' ? 'linen' : 'linen-dark'}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 44px;background:${v === 'dark' ? 'var(--stone-900)' : 'var(--brand-100)'};">
+        <span class="brand-tag" style="position:absolute;top:52px;">P I N C E L A D A &nbsp; U Y</span>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:120px;color:var(--gold);opacity:0.2;line-height:0.7;margin-bottom:-10px;">\u201C</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;line-height:1.45;max-width:420px;font-style:italic;color:${v === 'dark' ? 'var(--brand-100)' : 'var(--stone-900)'};">${esc(f.quote)}</div>
+        <div class="gold-line" style="width:80px;margin:24px 0;"></div>
+        <div style="font-size:15px;font-weight:500;color:${v === 'dark' ? 'var(--brand-100)' : 'var(--stone-900)'};">${esc(f.name)}</div>
+        <div style="font-size:13px;margin-top:4px;color:${v === 'dark' ? 'var(--stone-400)' : 'var(--stone-500)'};">${esc(f.role)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`
+  },
+
+  story: {
+    name: 'Historia',
+    variants: ['quote', 'photo'],
+    ratio: 'story',
+    fields: [
+      { id: 'image', label: 'Foto (solo variante foto)', type: 'image' },
+      { id: 'line1', label: 'Texto principal', type: 'text', default: 'Una pared vacía es' },
+      { id: 'line2', label: 'Texto destacado', type: 'text', default: 'una pared triste' },
+      { id: 'sub', label: 'Subtexto', type: 'text', default: 'Encontrá artistas uruguayos que le den vida a tus espacios.' },
+    ],
+    render: (f, v) => {
+      if (v === 'photo') {
+        const bg = f._imageData || 'linear-gradient(180deg, #333, #111)';
+        const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+        return `
+        <div class="tpl" style="display:flex;flex-direction:column;">
+          <div style="flex:1;background:${bgStyle};background-size:cover;background-position:center;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:36px 28px;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.7) 100%);"></div>
+            <div style="position:relative;z-index:1;">
+              <div class="brand-tag" style="font-size:11px;margin-bottom:12px;">P I N C E L A D A &nbsp; U Y</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:34px;color:#fff;line-height:1.3;">${esc(f.line1)} <strong>${esc(f.line2)}</strong></div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:20px;display:flex;align-items:center;gap:8px;">Ver más <span style="display:inline-block;width:24px;height:1px;background:var(--gold-light);"></span></div>
+            </div>
+          </div>
+        </div>`;
+      }
+      return `
+      <div class="tpl linen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 36px;background:var(--brand-100);">
+        <div style="position:absolute;top:0;left:0;width:100%;height:25%;background:radial-gradient(ellipse at 40% 0%,rgba(184,144,90,0.15) 0%,transparent 70%);pointer-events:none;"></div>
+        <span class="brand-tag" style="position:absolute;top:80px;font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;color:var(--stone-900);line-height:1.4;max-width:360px;">${esc(f.line1)} <strong>${esc(f.line2)}</strong></div>
+        <div class="gold-line" style="width:150px;margin:28px 0;"></div>
+        <div style="font-size:16px;color:var(--stone-600);max-width:320px;line-height:1.6;">${esc(f.sub)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`;
+    }
+  },
+
+  pregunta: {
+    name: 'Pregunta',
+    variants: ['classic', 'versus'],
+    ratio: 'story',
+    fields: [
+      { id: 'question', label: 'Pregunta', type: 'text', default: '¿Qué preferís en tu casa?' },
+      { id: 'opt1', label: 'Opción 1', type: 'text', default: 'Un cuadro original' },
+      { id: 'opt2', label: 'Opción 2', type: 'text', default: 'Una lámina de IKEA' },
+    ],
+    render: (f, v) => {
+      if (v === 'versus') {
+        return `
+        <div class="tpl linen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 32px;background:var(--brand-100);">
+          <span class="brand-tag" style="position:absolute;top:80px;font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:400;color:var(--stone-900);line-height:1.35;max-width:340px;">${esc(f.question)}</div>
+          <div style="display:flex;align-items:center;gap:20px;margin-top:36px;width:100%;max-width:320px;">
+            <div style="flex:1;padding:20px 12px;background:var(--stone-900);color:var(--brand-100);font-family:'DM Sans',sans-serif;font-size:15px;text-align:center;">${esc(f.opt1)}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);font-weight:600;">vs</div>
+            <div style="flex:1;padding:20px 12px;border:2px solid var(--gold);color:var(--stone-900);font-family:'DM Sans',sans-serif;font-size:15px;text-align:center;">${esc(f.opt2)}</div>
+          </div>
+          <span class="handle-bottom" style="bottom:60px;">@pincelada.uy</span>
+        </div>`;
+      }
+      return `
+      <div class="tpl linen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 32px;background:var(--brand-100);">
+        <span class="brand-tag" style="position:absolute;top:80px;font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:400;color:var(--stone-900);line-height:1.35;max-width:340px;">${esc(f.question)}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:32px;width:100%;max-width:300px;">
+          <div style="font-family:'DM Sans',sans-serif;font-size:16px;padding:16px 20px;border:2px solid var(--gold);color:var(--stone-900);background:rgba(184,144,90,0.06);text-align:center;">${esc(f.opt1)}</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:16px;padding:16px 20px;border:2px solid var(--gold);color:var(--stone-900);background:rgba(184,144,90,0.06);text-align:center;">${esc(f.opt2)}</div>
+        </div>
+        <span class="handle-bottom" style="bottom:60px;">@pincelada.uy</span>
+      </div>`;
+    }
+  }
+};
+
+let currentTpl = 'quote';
+let currentVar = 'light';
+let fieldValues = {};
+let imageData = null;
+let imageData2 = null;
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function isMobile() { return window.innerWidth <= 860; }
+
+function init() {
+  document.querySelectorAll('.template-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTpl = btn.dataset.tpl;
+      imageData = null;
+      imageData2 = null;
+      setupVariants();
+      setupFields();
+      render();
+      updateMobileScale();
+    });
+  });
+  setupVariants();
+  setupFields();
+  render();
+  updateMobileScale();
+  window.addEventListener('resize', updateMobileScale);
+}
+
+function setupVariants() {
+  const tpl = TEMPLATES[currentTpl];
+  const row = document.getElementById('variantRow');
+  row.innerHTML = '';
+  tpl.variants.forEach((v, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'variant-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.var = v;
+    btn.textContent = v.charAt(0).toUpperCase() + v.slice(1);
+    btn.addEventListener('click', () => {
+      row.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentVar = v;
+      render();
+    });
+    row.appendChild(btn);
+  });
+  currentVar = tpl.variants[0];
+
+  const frame = document.getElementById('renderFrame');
+  const label = document.getElementById('sizeLabel');
+  if (tpl.ratio === 'story') {
+    frame.className = 'render-frame story-size';
+    label.textContent = '1080 × 1920 px (9:16)';
+  } else {
+    frame.className = 'render-frame';
+    label.textContent = '1080 × 1350 px (4:5)';
+  }
+}
+
+function setupFields() {
+  const tpl = TEMPLATES[currentTpl];
+  const container = document.getElementById('fieldsContainer');
+  container.innerHTML = '';
+  fieldValues = {};
+
+  tpl.fields.forEach(f => {
+    fieldValues[f.id] = f.default || '';
+    const group = document.createElement('div');
+    group.className = 'field-group';
+
+    const label = document.createElement('label');
+    label.textContent = f.label;
+    group.appendChild(label);
+
+    if (f.type === 'image' || f.type === 'image2') {
+      const upload = document.createElement('div');
+      upload.className = 'image-upload';
+      upload.innerHTML = '<span>Tocá para subir imagen</span><input type="file" accept="image/*">';
+      const isSecond = f.type === 'image2';
+      upload.querySelector('input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            if (isSecond) { imageData2 = ev.target.result; }
+            else { imageData = ev.target.result; }
+            upload.classList.add('has-image');
+            upload.querySelector('span').textContent = file.name;
+            render();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      group.appendChild(upload);
+    } else if (f.type === 'textarea') {
+      const ta = document.createElement('textarea');
+      ta.value = f.default || '';
+      ta.addEventListener('input', () => { fieldValues[f.id] = ta.value; render(); });
+      group.appendChild(ta);
+    } else {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = f.default || '';
+      input.addEventListener('input', () => { fieldValues[f.id] = input.value; render(); });
+      group.appendChild(input);
+    }
+
+    container.appendChild(group);
+  });
+}
+
+function render() {
+  const tpl = TEMPLATES[currentTpl];
+  const f = { ...fieldValues };
+  if (imageData) f._imageData = imageData;
+  if (imageData2) f._imageData2 = imageData2;
+  document.getElementById('renderFrame').innerHTML = tpl.render(f, currentVar);
+}
+
+/* Scale the render frame to fit viewport on mobile */
+function updateMobileScale() {
+  const frame = document.getElementById('renderFrame');
+  const wrapper = document.getElementById('canvasWrapper');
+
+  if (!isMobile()) {
+    frame.style.transform = '';
+    wrapper.style.width = '';
+    wrapper.style.height = '';
+    return;
+  }
+
+  const tpl = TEMPLATES[currentTpl];
+  const isStory = tpl.ratio === 'story';
+  const nativeW = isStory ? 405 : 540;
+  const nativeH = isStory ? 720 : 675;
+
+  // Use FULL viewport width, no padding
+  const viewportW = window.innerWidth;
+  const scale = viewportW / nativeW;
+
+  frame.style.transform = `scale(${scale})`;
+  frame.style.transformOrigin = 'top left';
+
+  // Wrapper reflects the visible size so layout flows correctly
+  wrapper.style.width = viewportW + 'px';
+  wrapper.style.height = Math.round(nativeH * scale) + 'px';
+}
+
+async function downloadPNG() {
+  const btn = document.getElementById('downloadBtn');
+  const txt = document.getElementById('dlText');
+  btn.classList.add('downloading');
+  txt.textContent = 'Generando...';
+
+  const tpl = TEMPLATES[currentTpl];
+  const isStory = tpl.ratio === 'story';
+  const targetW = 1080;
+
+  const frame = document.getElementById('renderFrame');
+
+  // Temporarily reset scale for clean capture
+  const prevTransform = frame.style.transform;
+  frame.style.transform = 'none';
+
+  const nativeW = isStory ? 405 : 540;
+  const nativeH = isStory ? 720 : 675;
+  const captureScale = targetW / nativeW;
+
+  try {
+    const canvas = await html2canvas(frame, {
+      scale: captureScale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      width: nativeW,
+      height: nativeH,
+    });
+
+    const link = document.createElement('a');
+    link.download = `pincelada-${currentTpl}-${currentVar}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error('Export error:', err);
+    alert('Error al exportar. Intentá de nuevo.');
+  }
+
+  frame.style.transform = prevTransform;
+  btn.classList.remove('downloading');
+  txt.textContent = 'Descargar PNG';
+}
+
+init();
+</script>
+</body>
+</html>
