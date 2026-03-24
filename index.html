@@ -111,7 +111,7 @@
 
   .template-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 6px;
     margin-bottom: 24px;
   }
@@ -175,15 +175,15 @@
     color: #ddd;
     padding: 9px 11px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
     border-radius: 2px;
     -webkit-appearance: none;
   }
 
   .field-group input:focus,
-  .field-group textarea:focus { border-color: var(--gold); }
+  .field-group textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,144,90,0.2); }
 
   .field-group textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
@@ -458,6 +458,12 @@
       <button class="template-btn" data-tpl="testimonial">Testimonial</button>
       <button class="template-btn" data-tpl="story">Historia (9:16)</button>
       <button class="template-btn" data-tpl="pregunta">Pregunta (9:16)</button>
+      <button class="template-btn" data-tpl="storyCta">Story CTA</button>
+      <button class="template-btn" data-tpl="storyArtist">Story Artista</button>
+      <button class="template-btn" data-tpl="storyProcess">Story Proceso</button>
+      <button class="template-btn" data-tpl="storyDato">Story Dato</button>
+      <button class="template-btn" data-tpl="storyReveal">Story Reveal</button>
+      <button class="template-btn" data-tpl="storyEditorial">Story Editorial</button>
     </div>
 
     <h2>Variante</h2>
@@ -797,6 +803,289 @@ const TEMPLATES = {
           <div style="font-family:'DM Sans',sans-serif;font-size:16px;padding:16px 20px;border:2px solid var(--gold);color:var(--stone-900);background:rgba(184,144,90,0.06);text-align:center;">${esc(f.opt2)}</div>
         </div>
         <span class="handle-bottom" style="bottom:60px;">@pincelada.uy</span>
+      </div>`;
+    }
+  },
+
+  /* ═══════════════════════════════════════════════
+     NEW STORY TEMPLATES — Bold, editorial, diverse
+     ═══════════════════════════════════════════════ */
+
+  storyCta: {
+    name: 'Story CTA',
+    variants: ['dark', 'gold'],
+    ratio: 'story',
+    fields: [
+      { id: 'headline', label: 'Titular', type: 'text', default: 'Tu próximo cuadro\nestá acá' },
+      { id: 'body', label: 'Cuerpo', type: 'text', default: 'Artistas uruguayos. Obra original. Encargos a medida.' },
+      { id: 'cta', label: 'CTA (swipe up)', type: 'text', default: 'Deslizá para conocer' },
+    ],
+    render: (f, v) => {
+      const isGold = v === 'gold';
+      return `
+      <div class="tpl linen-dark" style="display:flex;flex-direction:column;justify-content:space-between;padding:0;background:${isGold ? 'var(--stone-900)' : 'var(--stone-900)'};">
+        <!-- Top brand bar -->
+        <div style="padding:60px 32px 0;text-align:center;">
+          <span class="brand-tag" style="font-size:11px;">P I N C E L A D A &nbsp; U Y</span>
+        </div>
+        <!-- Gold accent stripe -->
+        <div style="position:absolute;${isGold ? 'top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),transparent);' : 'top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,transparent,var(--gold),transparent);'}"></div>
+        <!-- Main content -->
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 36px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--brand-100);line-height:1.2;letter-spacing:-0.01em;">${esc(f.headline).replace(/\n/g, '<br>')}</div>
+          <div class="gold-line" style="width:60px;margin:24px 0;"></div>
+          <div style="font-size:15px;color:var(--stone-400);line-height:1.6;max-width:300px;">${esc(f.body)}</div>
+        </div>
+        <!-- CTA area -->
+        <div style="padding:0 36px 70px;display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);opacity:0.4;"></div>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);white-space:nowrap;">${esc(f.cta)}</span>
+          <span style="font-size:20px;color:var(--gold);">↑</span>
+        </div>
+      </div>`;
+    }
+  },
+
+  storyArtist: {
+    name: 'Story Artista',
+    variants: ['cinematic', 'minimal'],
+    ratio: 'story',
+    fields: [
+      { id: 'image', label: 'Foto del artista/obra', type: 'image' },
+      { id: 'name', label: 'Nombre', type: 'text', default: 'Valentina Rodríguez' },
+      { id: 'discipline', label: 'Disciplina', type: 'text', default: 'Acrílico sobre tela' },
+      { id: 'quote', label: 'Frase', type: 'text', default: 'Pinto lo que no puedo decir con palabras.' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(180deg, #2a2520 0%, #1a1614 100%)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      if (v === 'cinematic') {
+        return `
+        <div class="tpl" style="display:flex;flex-direction:column;background:#111;">
+          <!-- Photo: top 60% -->
+          <div style="height:60%;background:${bgStyle};background-size:cover;background-position:center;position:relative;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(17,17,17,1) 100%);"></div>
+            <div style="position:absolute;top:40px;left:28px;">
+              <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+            </div>
+          </div>
+          <!-- Info -->
+          <div style="flex:1;padding:0 32px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;">
+            <div style="position:absolute;top:-1px;left:32px;width:40px;height:3px;background:var(--gold);"></div>
+            <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;">A R T I S T A</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;color:var(--brand-100);line-height:1.15;">${esc(f.name)}</div>
+            <div style="font-size:14px;color:var(--stone-400);margin-top:6px;letter-spacing:0.04em;">${esc(f.discipline)}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--stone-400);line-height:1.5;margin-top:20px;padding-left:16px;border-left:2px solid var(--gold);">"${esc(f.quote)}"</div>
+          </div>
+        </div>`;
+      }
+      return `
+      <div class="tpl" style="display:flex;flex-direction:column;background:var(--brand-100);">
+        <div style="height:55%;background:${bgStyle};background-size:cover;background-position:center;position:relative;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 70%,var(--brand-100) 100%);"></div>
+        </div>
+        <div style="flex:1;padding:0 32px 60px;display:flex;flex-direction:column;justify-content:center;">
+          <span class="brand-tag" style="font-size:10px;margin-bottom:12px;">A R T I S T A &nbsp; P I N C E L A D A</span>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:400;color:var(--stone-900);line-height:1.15;">${esc(f.name)}</div>
+          <div style="font-size:14px;color:var(--stone-600);margin-top:6px;">${esc(f.discipline)}</div>
+          <div class="gold-line" style="width:40px;margin:16px 0;"></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--stone-600);line-height:1.5;">"${esc(f.quote)}"</div>
+        </div>
+      </div>`;
+    }
+  },
+
+  storyProcess: {
+    name: 'Story Proceso',
+    variants: ['step', 'fullbleed'],
+    ratio: 'story',
+    fields: [
+      { id: 'image', label: 'Foto del proceso', type: 'image' },
+      { id: 'step', label: 'Paso (número)', type: 'text', default: '02' },
+      { id: 'stepLabel', label: 'Etapa', type: 'text', default: 'Boceto inicial' },
+      { id: 'caption', label: 'Descripción', type: 'text', default: 'Primero el lápiz. Después, todo lo demás.' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(180deg, #3a3530 0%, #252220 100%)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      if (v === 'fullbleed') {
+        return `
+        <div class="tpl" style="background:${bgStyle};background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0.7) 100%);"></div>
+          <div style="position:absolute;top:40px;left:28px;">
+            <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+          </div>
+          <!-- Step indicator top right -->
+          <div style="position:absolute;top:36px;right:28px;text-align:right;">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--gold);line-height:1;opacity:0.7;">${esc(f.step)}</div>
+          </div>
+          <div style="position:relative;z-index:1;padding:0 28px 70px;">
+            <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">P R O C E S O</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;color:#fff;line-height:1.25;">${esc(f.stepLabel)}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.6);margin-top:12px;line-height:1.6;">${esc(f.caption)}</div>
+          </div>
+        </div>`;
+      }
+      return `
+      <div class="tpl" style="display:flex;flex-direction:column;background:var(--stone-900);">
+        <!-- Step number + label header -->
+        <div style="padding:50px 32px 24px;display:flex;align-items:baseline;gap:16px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1;">${esc(f.step)}</div>
+          <div>
+            <div style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);">P R O C E S O</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:var(--brand-100);margin-top:4px;">${esc(f.stepLabel)}</div>
+          </div>
+        </div>
+        <div class="gold-line" style="width:calc(100% - 64px);margin:0 32px;"></div>
+        <!-- Photo -->
+        <div style="flex:1;margin:20px 32px 0;background:${bgStyle};background-size:cover;background-position:center;position:relative;">
+        </div>
+        <!-- Caption -->
+        <div style="padding:20px 32px 65px;">
+          <div style="font-size:15px;color:var(--stone-400);line-height:1.6;">${esc(f.caption)}</div>
+          <span class="brand-tag" style="font-size:9px;display:block;margin-top:12px;opacity:0.5;">P I N C E L A D A &nbsp; U Y</span>
+        </div>
+      </div>`;
+    }
+  },
+
+  storyDato: {
+    name: 'Story Dato',
+    variants: ['bold', 'editorial'],
+    ratio: 'story',
+    fields: [
+      { id: 'number', label: 'Número', type: 'text', default: '72%' },
+      { id: 'context', label: 'Contexto', type: 'text', default: 'de uruguayos nunca compró\narte original' },
+      { id: 'source', label: 'Fuente', type: 'text', default: 'Fuente: encuesta Pincelada 2025' },
+      { id: 'takeaway', label: 'Remate', type: 'text', default: 'Y si el problema no es el precio, es el acceso?' },
+    ],
+    render: (f, v) => {
+      if (v === 'editorial') {
+        return `
+        <div class="tpl linen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 32px;background:var(--brand-100);">
+          <span class="brand-tag" style="position:absolute;top:60px;font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+          <div style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:24px;">S A B Í A S &nbsp; Q U E</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:var(--stone-900);line-height:1;">${esc(f.number)}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--stone-900);line-height:1.4;margin-top:12px;max-width:300px;">${esc(f.context).replace(/\n/g, '<br>')}</div>
+          <div class="gold-line" style="width:60px;margin:28px 0;"></div>
+          <div style="font-size:14px;color:var(--stone-600);line-height:1.6;max-width:280px;font-style:italic;">${esc(f.takeaway)}</div>
+          <div style="font-size:11px;color:var(--stone-400);margin-top:24px;">${esc(f.source)}</div>
+          <span class="handle-bottom" style="bottom:60px;">@pincelada.uy</span>
+        </div>`;
+      }
+      return `
+      <div class="tpl linen-dark" style="display:flex;flex-direction:column;justify-content:center;padding:60px 36px;background:var(--stone-900);">
+        <span class="brand-tag" style="position:absolute;top:60px;left:36px;font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+        <!-- Giant number -->
+        <div style="font-family:'Cormorant Garamond',serif;font-size:120px;font-weight:300;color:var(--gold);line-height:0.85;letter-spacing:-0.03em;">${esc(f.number)}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--brand-100);line-height:1.35;margin-top:16px;max-width:320px;">${esc(f.context).replace(/\n/g, '<br>')}</div>
+        <div style="width:50px;height:3px;background:var(--gold);margin:28px 0;opacity:0.6;"></div>
+        <div style="font-size:16px;color:var(--stone-400);line-height:1.6;max-width:300px;">${esc(f.takeaway)}</div>
+        <div style="font-size:11px;color:var(--stone-500);margin-top:20px;">${esc(f.source)}</div>
+        <span class="handle-bottom">@pincelada.uy</span>
+      </div>`;
+    }
+  },
+
+  storyReveal: {
+    name: 'Story Reveal',
+    variants: ['commission', 'workspace'],
+    ratio: 'story',
+    fields: [
+      { id: 'image', label: 'Foto (obra/espacio)', type: 'image' },
+      { id: 'topline', label: 'Línea superior', type: 'text', default: 'Encargo entregado' },
+      { id: 'title', label: 'Título', type: 'text', default: 'Acrílico 80×60\npara un living en Pocitos' },
+      { id: 'artist', label: 'Artista', type: 'text', default: 'por Valentina Rodríguez' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(180deg, #2a2520 0%, #1a1614 100%)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      if (v === 'workspace') {
+        return `
+        <div class="tpl" style="background:${bgStyle};background-size:cover;background-position:center;display:flex;flex-direction:column;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.5) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,0) 60%,rgba(0,0,0,0.6) 100%);"></div>
+          <!-- Top info -->
+          <div style="position:relative;z-index:1;padding:50px 28px 0;">
+            <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-top:16px;">${esc(f.topline)}</div>
+          </div>
+          <div style="flex:1;"></div>
+          <!-- Bottom info -->
+          <div style="position:relative;z-index:1;padding:0 28px 65px;">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:400;color:#fff;line-height:1.25;">${esc(f.title).replace(/\n/g, '<br>')}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-top:10px;">${esc(f.artist)}</div>
+          </div>
+        </div>`;
+      }
+      return `
+      <div class="tpl" style="display:flex;flex-direction:column;background:var(--stone-900);">
+        <!-- Photo area: 65% -->
+        <div style="height:65%;background:${bgStyle};background-size:cover;background-position:center;position:relative;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 70%,var(--stone-900) 100%);"></div>
+          <div style="position:absolute;top:40px;left:28px;">
+            <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+          </div>
+          <!-- Gold frame accent -->
+          <div style="position:absolute;bottom:30px;left:28px;right:28px;top:30px;border:1px solid rgba(184,144,90,0.15);pointer-events:none;"></div>
+        </div>
+        <!-- Info -->
+        <div style="flex:1;padding:8px 32px 60px;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);">${esc(f.topline)}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;color:var(--brand-100);line-height:1.3;margin-top:10px;">${esc(f.title).replace(/\n/g, '<br>')}</div>
+          <div style="font-size:14px;color:var(--stone-400);margin-top:8px;">${esc(f.artist)}</div>
+        </div>
+      </div>`;
+    }
+  },
+
+  storyEditorial: {
+    name: 'Story Editorial',
+    variants: ['magazine', 'split'],
+    ratio: 'story',
+    fields: [
+      { id: 'image', label: 'Foto editorial', type: 'image' },
+      { id: 'kicker', label: 'Kicker (arriba)', type: 'text', default: 'Montevideo' },
+      { id: 'headline', label: 'Titular', type: 'text', default: 'Las paredes\ntambién hablan' },
+      { id: 'sub', label: 'Bajada', type: 'text', default: 'Arte callejero que no pediste pero que te para en seco.' },
+    ],
+    render: (f, v) => {
+      const bg = f._imageData || 'linear-gradient(180deg, #3a3530, #1a1614)';
+      const bgStyle = f._imageData ? `url('${bg}') center/cover` : bg;
+      if (v === 'split') {
+        return `
+        <div class="tpl" style="display:flex;flex-direction:column;background:var(--brand-100);">
+          <!-- Photo top half -->
+          <div style="height:50%;background:${bgStyle};background-size:cover;background-position:center;position:relative;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,var(--brand-100) 100%);"></div>
+            <div style="position:absolute;top:40px;left:28px;">
+              <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+            </div>
+          </div>
+          <!-- Editorial text -->
+          <div style="flex:1;padding:0 32px 60px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;">${esc(f.kicker)}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;color:var(--stone-900);line-height:1.2;">${esc(f.headline).replace(/\n/g, '<br>')}</div>
+            <div class="gold-line" style="width:40px;margin:18px 0;"></div>
+            <div style="font-size:15px;color:var(--stone-600);line-height:1.6;max-width:300px;">${esc(f.sub)}</div>
+          </div>
+        </div>`;
+      }
+      /* magazine: full-bleed photo with editorial overlay */
+      return `
+      <div class="tpl" style="background:${bgStyle};background-size:cover;background-position:center;display:flex;flex-direction:column;">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.1) 40%,rgba(0,0,0,0.6) 100%);"></div>
+        <!-- Top -->
+        <div style="position:relative;z-index:1;padding:50px 28px 0;display:flex;justify-content:space-between;align-items:flex-start;">
+          <span class="brand-tag" style="font-size:10px;">P I N C E L A D A &nbsp; U Y</span>
+          <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">${esc(f.kicker)}</div>
+        </div>
+        <div style="flex:1;"></div>
+        <!-- Bottom editorial -->
+        <div style="position:relative;z-index:1;padding:0 28px 65px;">
+          <div style="width:40px;height:3px;background:var(--gold);margin-bottom:18px;"></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;color:#fff;line-height:1.15;letter-spacing:-0.01em;">${esc(f.headline).replace(/\n/g, '<br>')}</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-top:14px;max-width:300px;">${esc(f.sub)}</div>
+        </div>
       </div>`;
     }
   }
